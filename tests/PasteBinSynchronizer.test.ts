@@ -46,9 +46,8 @@ describe('PasteBinSynchronizer', () => {
         pastePages.map(page  => mock.onGet(`https://pastebin.com/${page[0]}`).reply(200, page[1]));
     }
 
-
     test('it should insert a single paste with its fields when no data yet', async () => {
-        const expectedPaste : PasteBin = { datePosted: new Date(Date.UTC(2022,4,2, 8, 2, 2)),pasteBinKey:'some_id', content: 'console.log()', title:'hello world', author:'mush', authorType: AuthorType.USER  };  
+        const expectedPaste : PasteBin =  generatePaste();
         const { pastePage, publicPastesPage } = generatePasteBinHtml([expectedPaste]);
     
         setAxiosMocks(publicPastesPage, pastePage);
@@ -57,7 +56,6 @@ describe('PasteBinSynchronizer', () => {
 
         expect(await pasteBinStorage.listPasteBins()).toEqual([expect.objectContaining(expectedPaste)]);    
     });
-
 
     test('it should insert only new pastes', async () => {
         const existingPaste : PasteBin = { datePosted: new Date(Date.UTC(2022,4,2, 8, 2, 2)),pasteBinKey:'existing_paste_key', content: `console.log('existing paste')`, title:'existing paste', author:'user x', authorType: AuthorType.USER  };
@@ -74,7 +72,6 @@ describe('PasteBinSynchronizer', () => {
         expect(await pasteBinStorage.listPasteBins()).toEqual(expect.arrayContaining([expect.objectContaining(existingPaste), expect.objectContaining(newPaste)]));
          
     });
-
 
     test('it should insert guest normalized', async () => {
         const newPaste : PasteBin = generatePaste({ author: null, authorType: AuthorType.GUEST  });
@@ -191,6 +188,4 @@ describe('PasteBinSynchronizer', () => {
 
         pasteBinSynchronizer.stop();    
     });
-
-
 });
