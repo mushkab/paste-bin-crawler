@@ -37,6 +37,11 @@ export class PasteBinStorage {
         return (await res.toArray()).map(PasteBinStorage.documentToPasteBin);
     }
 
+    async listPastesBinsByKeys(pasteBinKeys : string[]) : Promise<PasteBin[]>{
+        const res = await this.collection.find({ pasteBinKey : { $in : pasteBinKeys } });
+        return (await res.toArray()).map(PasteBinStorage.documentToPasteBin);
+    }
+
     async getByPasteBinKey(key :string) : Promise<PasteBin> {
         const res =  await this.collection.findOne({ pasteBinKey: key });
 

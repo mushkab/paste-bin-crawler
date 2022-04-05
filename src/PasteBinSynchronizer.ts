@@ -12,15 +12,11 @@ export class PasteBinSynchronizer {
     }
 
     async sync() : Promise<void> {
-        console.log('sync 1');
-        const pastesBins : string[]  = await this.parser.parseRecentsPastesPage();   
+        const recentPastesBins : string[]  = await this.parser.parseRecentsPastesPage();   
   
-        const res = await (await this.pasteBinStorage.listPasteBins()).map(p => p.pasteBinKey);
+        const existingPasteBins = await (await this.pasteBinStorage.listPastesBinsByKeys(recentPastesBins)).map(p => p.pasteBinKey);
 
-        const pastesIdsToInsert = _.difference(pastesBins,res).slice(0,1);
-
-
-        console.log('sync 2', pastesIdsToInsert);
+        const pastesIdsToInsert = _.difference(recentPastesBins,existingPasteBins);
 
         const pastesToInsert = await Promise.all(pastesIdsToInsert.map(async (pasteBinKey: string) => {
 
@@ -34,8 +30,6 @@ export class PasteBinSynchronizer {
                 
             }
         }));
-
-        console.log('sync 3', pastesToInsert);
 
         return this.pasteBinStorage.insert(_.compact(pastesToInsert));     
     }
