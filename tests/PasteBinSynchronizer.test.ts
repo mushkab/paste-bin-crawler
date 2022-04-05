@@ -85,7 +85,7 @@ describe('PasteBinSynchronizer', () => {
    
         await pasteBinSynchronizer.sync();
    
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toEqual(expect.objectContaining({ authorType:AuthorType.GUEST, author:null}));  
+        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ authorType:AuthorType.GUEST, author:null});  
     });
 
     test('it should insert title normalized', async () => {
@@ -98,7 +98,22 @@ describe('PasteBinSynchronizer', () => {
    
         await pasteBinSynchronizer.sync();
 
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toEqual(expect.objectContaining({ title: null }));  
+        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject(({ title: null }));  
+    });
+
+
+    test('it should convert paste date from CDT to UTC', async () => {
+        const utcDate = new Date(Date.UTC(96, 1, 2, 3, 4, 5)); // Fri, 02 Feb 1996 03:04:05 GMT
+        const newPaste : PasteBin = generatePaste({ datePosted:utcDate });
+
+        
+        const { pastePage, publicPastesPage } = generatePasteBinHtml([newPaste]);
+       
+        setAxiosMocks(publicPastesPage, pastePage);
+   
+        await pasteBinSynchronizer.sync();
+
+        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ datePosted:utcDate });  
     });
 
 
@@ -112,7 +127,7 @@ describe('PasteBinSynchronizer', () => {
    
         await pasteBinSynchronizer.sync();
    
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toEqual(expect.objectContaining({ content:'console.log' }));
+        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ content:'console.log' });
          
     });
 
@@ -127,7 +142,7 @@ describe('PasteBinSynchronizer', () => {
    
         await pasteBinSynchronizer.sync();
    
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toEqual(expect.objectContaining({ content:' console.log' }));
+        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ content:' console.log' });
          
     });
 
@@ -176,4 +191,6 @@ describe('PasteBinSynchronizer', () => {
 
         pasteBinSynchronizer.stop();    
     });
+
+
 });

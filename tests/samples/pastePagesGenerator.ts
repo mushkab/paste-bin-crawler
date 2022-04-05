@@ -1,4 +1,5 @@
-import moment from "moment";
+import moment from 'moment';
+import 'moment-timezone';
 import { AuthorType, PasteBin } from "../../src/PasteBinStorage";
 
 const publicPastesPage = (pastes : PasteBin[]) : string =>
@@ -497,7 +498,7 @@ const pastePage =  (paste: PasteBin) => `<!DOCTYPE html>
                                              <a href="/message/compose?to=aliakbarbeda2" class="message" title="Send a private message to: aliakbarbeda2"></a>
                                     
                 <div class="date">
-                    <span title="${moment(paste.datePosted).format('dddd Do of MMMM YYYY hh:mm:ss A z')}">${moment(paste.datePosted).format('MMM Do, YYYY')}</span>
+                    <span title="${moment(paste.datePosted).tz('America/Chicago').format('dddd Do of MMMM YYYY hh:mm:ss A z')}">${moment(paste.datePosted).tz('America/Chicago').format('MMM Do, YYYY')}</span>
 
                                     </div>
 
