@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import axios from 'axios';
 import  express from 'express';
 import { MongoClient } from 'mongodb';
@@ -7,13 +8,15 @@ import { PasteBinSynchronizer } from './src/PasteBinSynchronizer';
 import { initRoutes } from './src/routes';
 
 
-const url = 'mongodb://localhost:27017';
-const dbName = 'paste_synchronizer_production';
+const url = process.env['MONGO_URI'];
+const dbName = process.env['DB_NAME'];
 const syncIntervalTimeInMs = 60 * 2 * 1000; // sec * min * ms
-const port = 3000;
-
+const port = process.env['PORT'];
 
 async function init() {
+    if(!url || !dbName || !port) {
+        throw new Error('plz supply all env vars');
+    }
     const app = express();
     app.listen(port, () => {
         console.log(`paste bin app listening on port ${port}`);

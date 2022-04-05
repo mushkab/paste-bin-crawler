@@ -1,0 +1,22 @@
+version: '3.9'
+services: 
+  mongo_db:
+    image: mongo:latest
+    restart: always 
+    ports:
+      - 27017:27017
+    volumes: 
+      - mongo_db:/data/db 
+  node-web:
+    build: .
+    depends_on: 
+      - mongo_db
+    ports: 
+      - 4000:3000
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo_db:27017
+      DB_NAME: paste_synchronizer_production
+
+volumes: 
+  mongo_db: {}
