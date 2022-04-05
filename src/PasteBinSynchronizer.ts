@@ -14,7 +14,7 @@ export class PasteBinSynchronizer {
     async sync() : Promise<void> {
         const recentPastesBins : string[]  = await this.parser.parseRecentsPastesPage();   
   
-        const existingPasteBins = await (await this.pasteBinStorage.listPastesBinsByKeys(recentPastesBins)).map(p => p.pasteBinKey);
+        const existingPasteBins = (await this.pasteBinStorage.listPastesBinsByKeys(recentPastesBins)).map(p => p.pasteBinKey);
 
         const pastesIdsToInsert = _.difference(recentPastesBins,existingPasteBins);
 
