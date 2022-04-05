@@ -1,6 +1,6 @@
 
 import _ from 'lodash';
-import { PasteBinStorage } from './PasteBinStorage';
+import { PasteBinStorage } from './storage/PasteBinStorage';
 import { PasteBinParser } from './PasteBinParser';
 
 export class PasteBinSynchronizer {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import  express from 'express';
 import { MongoClient } from 'mongodb';
 import { PasteBinParser } from './src/PasteBinParser';
-import {  PasteBinStorage } from './src/PasteBinStorage';
+import {  PasteBinStorage } from './src/storage/PasteBinStorage';
 import { PasteBinSynchronizer } from './src/PasteBinSynchronizer';
 import { initRoutes } from './src/routes';
 

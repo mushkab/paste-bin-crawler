@@ -1,6 +1,6 @@
 import moment from 'moment';
 import 'moment-timezone';
-import { AuthorType, PasteBin } from "../../src/PasteBinStorage";
+import { PasteBin,AuthorType } from '../../src/PasteBin';
 
 const publicPastesPage = (pastes : PasteBin[]) : string =>
     `<!DOCTYPE html>

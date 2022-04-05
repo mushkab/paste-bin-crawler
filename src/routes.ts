@@ -1,6 +1,6 @@
 
 import  express from 'express';
-import {  PasteBinStorage } from './PasteBinStorage';
+import {  PasteBinStorage } from './storage/PasteBinStorage';
 
 
 export function initRoutes(app : express.Express, storage : PasteBinStorage) {

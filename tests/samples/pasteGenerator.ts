@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { PasteBin, AuthorType } from "../../src/PasteBinStorage";
+import { PasteBin,AuthorType } from '../../src/PasteBin';
 
 
 export function generatePaste(paste?: Partial<PasteBin>) {

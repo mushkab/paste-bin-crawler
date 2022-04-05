@@ -2,7 +2,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { Axios } from 'axios';
 import * as cheerio from 'cheerio';
-import { PasteBin,AuthorType } from './PasteBinStorage';
+import { PasteBin,AuthorType } from './PasteBin';
 
 export class PasteBinParser {
     constructor(private readonly axios : Axios) {

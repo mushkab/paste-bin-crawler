@@ -1,20 +1,6 @@
 import { Db, Document, Collection } from 'mongodb';
+import { PasteBin } from '../PasteBin';
 
-export enum AuthorType {
-    UNKNOWN,
-    USER,
-    GUEST,
-}
-
-export interface PasteBin {
-    _id?:string;
-    pasteBinKey:string;
-    title: string | null;
-    datePosted: Date;
-    author: string | null;
-    authorType:AuthorType
-    content: string;
-}
 
 interface ListPasteBinsParams {
     skip: number;
@@ -57,3 +43,4 @@ export class PasteBinStorage {
         return PasteBinStorage.documentToPasteBin(res);
     }
 }
+ 
