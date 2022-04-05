@@ -16,7 +16,8 @@ export class PasteBinSynchronizer {
   
         const existingPasteBins = (await this.pasteBinStorage.listPastesBinsByKeys(recentPastesBins)).map(p => p.pasteBinKey);
 
-        const pastesIdsToInsert = _.difference(recentPastesBins,existingPasteBins);
+        // paste bin has rate limiter so we minimize to 2 inserts each cycle for not getting blocked
+        const pastesIdsToInsert = _.difference(recentPastesBins,existingPasteBins).slice(0,2);
 
         const pastesToInsert = await Promise.all(pastesIdsToInsert.map(async (pasteBinKey: string) => {
 
@@ -27,17 +28,25 @@ export class PasteBinSynchronizer {
                 return pasteBin;   
 
             } catch(e) {
+
+                console.error(e, `error syncing single paste ${pasteBinKey}`);
                 
             }
         }));
 
+
+        console.log('inserting pastes', pastesIdsToInsert);
+
         return this.pasteBinStorage.insert(_.compact(pastesToInsert));     
     }
 
-    start() : void {
+    async start() : Promise<void> {
+        console.log('started syncing recent pastes');
         if(this.intervalId) {
             throw new Error('sync already running - plz stop before');
         }
+
+        await this.sync();
 
         let isRunning = false;
         this.intervalId = setInterval(async () => { 
@@ -49,8 +58,9 @@ export class PasteBinSynchronizer {
 
             try {
                 await this.sync();
+                console.log('done sync cycle');
             } catch(e){
-                console.log('start error');
+                console.error(e, 'error syncing recent pastes');
             }
             finally {
                 isRunning = false;

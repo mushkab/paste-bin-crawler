@@ -16,6 +16,11 @@ export interface PasteBin {
     content: string;
 }
 
+interface ListPasteBinsParams {
+    skip: number;
+    limit: number;
+}
+
 export class PasteBinStorage {
 
     private readonly collection : Collection;
@@ -32,8 +37,8 @@ export class PasteBinStorage {
         await this.collection.insertMany(pastes.map(p => ({pasteBinKey: p.pasteBinKey, author: p.author, datePosted: p.datePosted, authorType:p.authorType, title: p.title, content: p.content })));
     }
 
-    async listPasteBins() : Promise<PasteBin[]> {
-        const res = await this.collection.find({});
+    async listPasteBins(params : ListPasteBinsParams = { skip: 0, limit:15}) : Promise<PasteBin[]> {
+        const res = await this.collection.find({}, params);
         return (await res.toArray()).map(PasteBinStorage.documentToPasteBin);
     }
 

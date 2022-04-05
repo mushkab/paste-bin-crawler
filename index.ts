@@ -1,21 +1,29 @@
 import axios from 'axios';
+import  express from 'express';
 import { MongoClient } from 'mongodb';
 import { PasteBinParser } from './src/PasteBinParser';
 import {  PasteBinStorage } from './src/PasteBinStorage';
 import { PasteBinSynchronizer } from './src/PasteBinSynchronizer';
+import { initRoutes } from './src/routes';
 
 
 const url = 'mongodb://localhost:27017';
 const syncIntervalTimeInMs = 60 * 2 * 1000; // sec * min * ms
+const port = 3000;
 
 
 async function init() {
+    const app = express();
+    app.listen(port, () => {
+        console.log(`paste bin app listening on port ${port}`);
+    });
     const client = new MongoClient(url);
     await client.connect();
     const db = client.db('paste_synchronizer_production');
     const storage = new PasteBinStorage(db);
-    const synchronizer = new PasteBinSynchronizer(storage,new PasteBinParser(axios),60000);
+    const synchronizer = new PasteBinSynchronizer(storage,new PasteBinParser(axios),syncIntervalTimeInMs);
     synchronizer.start();
+    initRoutes(app, storage);
 }
 
 
