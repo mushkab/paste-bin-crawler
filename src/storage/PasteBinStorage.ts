@@ -1,4 +1,4 @@
-import { Db, Document, Collection } from 'mongodb';
+import { Document, Collection, MongoClient } from 'mongodb';
 import { PasteBin } from '../PasteBin';
 
 
@@ -7,12 +7,10 @@ interface ListPasteBinsParams {
     limit: number;
 }
 
+
 export class PasteBinStorage {
 
-    private readonly collection : Collection;
-
-    constructor(db: Db) {
-        this.collection = db.collection('paste_bin');
+    private constructor(readonly collection: Collection) {
     }
 
     static documentToPasteBin(document: Document) :  PasteBin {
@@ -37,10 +35,17 @@ export class PasteBinStorage {
         const res =  await this.collection.findOne({ pasteBinKey: key });
 
         if(!res) {
-            throw new Error(`paste bin key ${key} no found`);
+            throw new Error(`paste bin key ${key} not found`);
         }
 
         return PasteBinStorage.documentToPasteBin(res);
+    }
+
+    static async create(dbName : string, client : MongoClient) {
+        const db = client.db(dbName);
+        const collection = db.collection('paste_bin');
+        await collection.createIndex({ "pasteBinKey": 1 }, { unique: true });
+        return new PasteBinStorage(collection);
     }
 }
  

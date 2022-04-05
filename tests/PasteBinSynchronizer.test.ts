@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import eventually from 'wix-eventually';
-import { Db, MongoClient } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import MockAdapter from 'axios-mock-adapter';
 import { PasteBinSynchronizer } from '../src/PasteBinSynchronizer';
 import { PasteBinStorage } from '../src/storage/PasteBinStorage';
@@ -13,33 +13,31 @@ import { PasteBinParser } from '../src/PasteBinParser';
 
 describe('PasteBinSynchronizer', () => {
 
+    const mock = new MockAdapter(axios);
     const url = 'mongodb://localhost:27017';
     const client = new MongoClient(url);
-    const mock = new MockAdapter(axios);
 
     let pasteBinSynchronizer : PasteBinSynchronizer;
     let pasteBinStorage : PasteBinStorage;
-    let db : Db;
-
+    let dbName : string;
 
     beforeAll(async () => {
         await client.connect();
-        const uuid = uuidv4();
-        db = client.db(`paste_synchronizer_dev_${uuid}`);
     });
 
     afterAll(async () => {
         await client.close();
     });
 
-    beforeEach(() => {
-        pasteBinStorage = new PasteBinStorage(db);
+    beforeEach(async () => {
+        const uuid = uuidv4();
+        dbName = `paste_synchronizer_dev_${uuid}`;
+        pasteBinStorage = await PasteBinStorage.create(dbName, client);
         pasteBinSynchronizer = new PasteBinSynchronizer(pasteBinStorage,new PasteBinParser(axios), 1000);
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         mock.reset();
-        await db.dropCollection('paste_bin');
     });
 
     function setAxiosMocks(publicPastesPage: string, pastePages : string[][]) {

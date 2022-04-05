@@ -34,6 +34,10 @@ export class PasteBinSynchronizer {
             }
         }));
 
+        if(pastesIdsToInsert.length === 0) {
+            return;
+        }
+
 
         console.log('inserting pastes', pastesIdsToInsert);
 
@@ -46,7 +50,11 @@ export class PasteBinSynchronizer {
             throw new Error('sync already running - plz stop before');
         }
 
-        await this.sync();
+        try {
+            await this.sync();
+        } catch(e) {
+            console.error(e, 'error with initial sync');
+        }
 
         let isRunning = false;
         this.intervalId = setInterval(async () => { 
