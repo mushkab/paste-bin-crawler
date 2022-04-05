@@ -492,7 +492,7 @@ const pastePage =  (paste: PasteBin) => `<!DOCTYPE html>
             </div>
             <div class="info-bottom">
 
-                                    <div class="username">${paste.authorType === AuthorType.USER ? `<a href="/u/${paste.author}">${paste.author}</a>` : 'a guest'}</div>
+                                    <div class="username">${paste.authorType === AuthorType.USER ? `<a href="/u/${paste.author}">${paste.author}</a>` : paste.authorType === AuthorType.GUEST ?  'a guest' : 'someting'}</div>
 
                     
                                              <a href="/message/compose?to=aliakbarbeda2" class="message" title="Send a private message to: aliakbarbeda2"></a>

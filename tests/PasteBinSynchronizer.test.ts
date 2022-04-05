@@ -74,43 +74,54 @@ describe('PasteBinSynchronizer', () => {
     });
 
     test('it should insert guest normalized', async () => {
-        const newPaste : PasteBin = generatePaste({ author: null, authorType: AuthorType.GUEST  });
+        const paste : PasteBin = generatePaste({ author: null, authorType: AuthorType.GUEST  });
 
-        const { pastePage, publicPastesPage } = generatePasteBinHtml([newPaste]);
+        const { pastePage, publicPastesPage } = generatePasteBinHtml([paste]);
        
         setAxiosMocks(publicPastesPage, pastePage);
    
         await pasteBinSynchronizer.sync();
    
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ authorType:AuthorType.GUEST, author:null});  
+        expect((await pasteBinStorage.getByPasteBinKey(paste.pasteBinKey))).toMatchObject({ authorType:AuthorType.GUEST, author:null});  
+    });
+
+    test('it should insert unknown author type and null author when html contains unknown term', async () => {
+        const paste : PasteBin = generatePaste({ author: null, authorType: AuthorType.UNKNOWN  });
+
+        const { pastePage, publicPastesPage } = generatePasteBinHtml([paste]);
+       
+        setAxiosMocks(publicPastesPage, pastePage);
+   
+        await pasteBinSynchronizer.sync();
+   
+        expect((await pasteBinStorage.getByPasteBinKey(paste.pasteBinKey))).toMatchObject({ authorType:AuthorType.UNKNOWN, author:null});  
     });
 
     test('it should insert title normalized', async () => {
-        const newPaste : PasteBin = generatePaste({ title: null  });
-
-        
-        const { pastePage, publicPastesPage } = generatePasteBinHtml([newPaste]);
+        const paste : PasteBin = generatePaste({ title: null  });
+      
+        const { pastePage, publicPastesPage } = generatePasteBinHtml([paste]);
        
         setAxiosMocks(publicPastesPage, pastePage);
    
         await pasteBinSynchronizer.sync();
 
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject(({ title: null }));  
+        expect((await pasteBinStorage.getByPasteBinKey(paste.pasteBinKey))).toMatchObject(({ title: null }));  
     });
 
 
     test('it should convert paste date from CDT to UTC', async () => {
         const utcDate = new Date(Date.UTC(96, 1, 2, 3, 4, 5)); // Fri, 02 Feb 1996 03:04:05 GMT
-        const newPaste : PasteBin = generatePaste({ datePosted:utcDate });
+        const paste : PasteBin = generatePaste({ datePosted:utcDate });
 
         
-        const { pastePage, publicPastesPage } = generatePasteBinHtml([newPaste]);
+        const { pastePage, publicPastesPage } = generatePasteBinHtml([paste]);
        
         setAxiosMocks(publicPastesPage, pastePage);
    
         await pasteBinSynchronizer.sync();
 
-        expect((await pasteBinStorage.getByPasteBinKey(newPaste.pasteBinKey))).toMatchObject({ datePosted:utcDate });  
+        expect((await pasteBinStorage.getByPasteBinKey(paste.pasteBinKey))).toMatchObject({ datePosted:utcDate });  
     });
 
 

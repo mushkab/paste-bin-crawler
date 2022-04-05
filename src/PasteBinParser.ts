@@ -21,10 +21,10 @@ export class PasteBinParser {
         const utcDate = moment.tz(date,'dddd Do of MMMM YYYY hh:mm:ss A z','America/Chicago').utc().toDate();
         const content = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > textarea').text().trimEnd();
 
-        const isGuest = !userName && guestText === 'a guest';
+        const authorType = userName ? AuthorType.USER : guestText === 'a guest' ? AuthorType.GUEST : AuthorType.UNKNOWN;
         const noTitle = title === 'Untitled';
 
-        const pasteBin : PasteBin= { authorType: isGuest ? AuthorType.GUEST : AuthorType.USER, author: isGuest ? null : userName, title: noTitle ? null : title, datePosted: utcDate, content, pasteBinKey:key };
+        const pasteBin : PasteBin= { authorType, author: authorType === AuthorType.USER ? userName : null, title: noTitle ? null : title, datePosted: utcDate, content, pasteBinKey:key };
 
         return pasteBin;
     }

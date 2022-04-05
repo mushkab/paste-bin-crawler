@@ -1,8 +1,9 @@
 import { Db, Document, Collection } from 'mongodb';
 
 export enum AuthorType {
+    UNKNOWN,
+    USER,
     GUEST,
-    USER
 }
 
 export interface PasteBin {
