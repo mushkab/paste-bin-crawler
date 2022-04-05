@@ -35,6 +35,7 @@ export class PasteBinSynchronizer {
         }));
 
         if(pastesIdsToInsert.length === 0) {
+            console.log('no pastes to sync');
             return;
         }
 
