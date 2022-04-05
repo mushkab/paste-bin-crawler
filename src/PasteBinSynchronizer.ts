@@ -19,7 +19,7 @@ export class PasteBinSynchronizer {
         // paste bin has rate limiter so we minimize to 2 inserts each cycle for not getting blocked
         const pastesIdsToInsert = _.difference(recentPastesBins,existingPasteBins).slice(0,2);
 
-        const pastesToInsert = await Promise.all(pastesIdsToInsert.map(async (pasteBinKey: string) => {
+        const pastesToInsert = _.compact(await Promise.all(pastesIdsToInsert.map(async (pasteBinKey: string) => {
 
             try {
 
@@ -32,17 +32,17 @@ export class PasteBinSynchronizer {
                 console.error(e, `error syncing single paste ${pasteBinKey}`);
                 
             }
-        }));
+        })));
 
-        if(pastesIdsToInsert.length === 0) {
+        if(pastesToInsert.length === 0) {
             console.log('no pastes to sync');
             return;
         }
 
 
-        console.log('inserting pastes', pastesIdsToInsert);
+        console.log('inserting pastes', pastesToInsert);
 
-        return this.pasteBinStorage.insert(_.compact(pastesToInsert));     
+        return this.pasteBinStorage.insert(pastesToInsert);     
     }
 
     async start() : Promise<void> {

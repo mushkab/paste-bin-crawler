@@ -109,6 +109,30 @@ describe('PasteBinSynchronizer', () => {
     });
 
 
+    test('it should not populate paste when html is not following structure', async () => {
+        const paste : PasteBin = generatePaste();
+      
+        const { publicPastesPage } = generatePasteBinHtml([paste]);
+        
+       
+        setAxiosMocks(publicPastesPage, [[paste.pasteBinKey,'<html></html']]);
+   
+        await pasteBinSynchronizer.sync();
+
+        expect((await pasteBinStorage.listPasteBins())).toHaveLength(0); 
+    });
+
+
+    test('it should throw when recents pastes page is currupted', async () => {
+        const paste : PasteBin = generatePaste();
+      
+     
+        setAxiosMocks('<html></html', [[paste.pasteBinKey,'<html></html']]);
+
+        await expect(pasteBinSynchronizer.sync()).rejects.toThrow('no recent paste bins');
+    });
+
+
     test('it should convert paste date from CDT to UTC', async () => {
         const utcDate = new Date(Date.UTC(96, 1, 2, 3, 4, 5)); // Fri, 02 Feb 1996 03:04:05 GMT
         const paste : PasteBin = generatePaste({ datePosted:utcDate });

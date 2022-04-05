@@ -9,34 +9,81 @@ export class PasteBinParser {
 
     }
 
+    private readonly userNameContainerPath = 'body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-bottom > div.username';
+    private readonly userNameTextPath = `${this.userNameContainerPath} > a`;
+    private readonly titlePath = 'body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-top > h1';
+    private readonly datePath = 'body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-bottom > div.date > span';
+    private readonly contentPath = 'body > div.wrap > div.container > div.content > div.post-view > textarea';
+    private readonly pasteBinKeyPath = 'body > div.wrap > div.container > div.content > div.page.page-archive.-top > div.archive-table > table > tbody > tr > td:nth-child(1) > a';
+
     async parsePastePage(key : string) : Promise<PasteBin>{
         const res = await this.axios.get(`https://pastebin.com/${key}`);
-        const pasteHtmlQuery = cheerio.load(res.data);
+        const $ = cheerio.load(res.data);
 
-        const userName = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-bottom > div.username > a').text();
-        const guestText = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-bottom > div.username').text();
-        const title = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-top > h1').text();
-        const date = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > div.details > div.info-bar > div.info-bottom > div.date > span').attr('title') || '';
+    
+        const userNameContainerElement = $(this.userNameContainerPath);
+
+        if(userNameContainerElement.length === 0) {
+            throw new Error('structure is unexpected - no username container');
+        }
+
+        const userNameText = $(this.userNameTextPath).text();
+        const guestText = userNameContainerElement.text();
+
+        const titleElement = $(this.titlePath);
+
+        if(titleElement.length === 0) {
+            throw new Error('structure is unexpected - no title container');
+        }
+
+        const title = titleElement.text();
+
+
+        const dateElement = $(this.datePath);
+
+        if(dateElement.length === 0) {
+            throw new Error('structure is unexpected - no date container');
+        }
+
+        const date = dateElement.attr('title');
+
+        if(!date) {
+            throw new Error('structure is unexpected - no date title attr');
+        }
         
         const utcDate = moment.tz(date,'dddd Do of MMMM YYYY hh:mm:ss A z','America/Chicago').utc().toDate();
-        const content = pasteHtmlQuery('body > div.wrap > div.container > div.content > div.post-view > textarea').text().trimEnd();
 
-        const authorType = userName ? AuthorType.USER : guestText === 'a guest' ? AuthorType.GUEST : AuthorType.UNKNOWN;
+
+        const contentElement = $(this.contentPath);
+
+        if(contentElement.length === 0) {
+            throw new Error('structure is unexpected - no content container');
+        }
+
+        const content = contentElement.text().trimEnd();
+
+        const authorType = userNameText ? AuthorType.USER : guestText === 'a guest' ? AuthorType.GUEST : AuthorType.UNKNOWN;
         const noTitle = title === 'Untitled';
 
-        const pasteBin : PasteBin= { authorType, author: authorType === AuthorType.USER ? userName : null, title: noTitle ? null : title, datePosted: utcDate, content, pasteBinKey:key };
+        const pasteBin : PasteBin= { authorType, author: authorType === AuthorType.USER ? userNameText : null, title: noTitle ? null : title, datePosted: utcDate, content, pasteBinKey:key };
 
         return pasteBin;
     }
 
     async parseRecentsPastesPage() : Promise<string[]>  {
         const res = await this.axios.get('https://pastebin.com/archive');
-        const recentPastesHtmlQuery = cheerio.load(res.data);
+        const $ = cheerio.load(res.data);
 
         const pastesBins : string[]  = [];
 
-        recentPastesHtmlQuery('body > div.wrap > div.container > div.content > div.page.page-archive.-top > div.archive-table > table > tbody > tr > td:nth-child(1) > a').each((i,e) => {
-            const pasteId = recentPastesHtmlQuery(e).attr('href')?.substring(1);
+        const tableKeyElements = $(this.pasteBinKeyPath);
+
+        if(tableKeyElements.length === 0) {
+            throw new Error('structure is unexpected - no recent paste bins');
+        }
+
+        tableKeyElements.each((i,e) => {
+            const pasteId = $(e).attr('href')?.substring(1);
             if(pasteId) {
                 pastesBins.push(pasteId);
             }
